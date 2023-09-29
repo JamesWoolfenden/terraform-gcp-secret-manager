@@ -12,5 +12,3 @@ module "secret-manager" {
     google_pubsub_topic.secret.id
   ]
 }
-
-

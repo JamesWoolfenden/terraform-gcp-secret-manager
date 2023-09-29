@@ -14,5 +14,3 @@ output "secret_versions" {
 
   description = "The name list of Secret Versions"
 }
-
-
