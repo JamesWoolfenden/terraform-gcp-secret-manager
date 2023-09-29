@@ -17,7 +17,7 @@ A working cloudsource module with example.
 Add **module.secretmanager.tf** to your code:-
 
 ```terraform
-module "cloudsource" {
+module "secretmanager" {
   source      ="jameswoolfenden/cloudsource/gcp"
   key_ring_id = google_kms_key_ring.key_ring.id
   secrets = [
