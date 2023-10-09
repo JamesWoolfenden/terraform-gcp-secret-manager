@@ -97,6 +97,8 @@ resource "google_project_iam_custom_role" "terraform_pike" {
     "cloudkms.cryptoKeyVersions.list",
     "cloudkms.cryptoKeys.create",
     "cloudkms.cryptoKeys.get",
+    "cloudkms.cryptoKeys.getIamPolicy",
+    "cloudkms.cryptoKeys.setIamPolicy",
     "cloudkms.cryptoKeys.update"
   ]
 }
