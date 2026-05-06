@@ -41,7 +41,7 @@ No requirements.
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_google"></a> [google](#provider\_google) | n/a |
 | <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | n/a |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
@@ -53,7 +53,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [google-beta_google_project_service_identity.secretmanager](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_project_service_identity) | resource |
 | [google_kms_crypto_key.secrets](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key) | resource |
 | [google_kms_crypto_key_iam_member.encrypter_decrypter](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/kms_crypto_key_iam_member) | resource |
@@ -65,7 +65,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_key_ring_id"></a> [key\_ring\_id](#input\_key\_ring\_id) | n/a | `string` | n/a | yes |
 | <a name="input_labels"></a> [labels](#input\_labels) | n/a | `map(string)` | `{}` | no |
 | <a name="input_rotation_period"></a> [rotation\_period](#input\_rotation\_period) | n/a | `string` | n/a | yes |
@@ -75,7 +75,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | The name list of Secrets |
 | <a name="output_secret_versions"></a> [secret\_versions](#output\_secret\_versions) | The name list of Secret Versions |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
