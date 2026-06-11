@@ -63,9 +63,9 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_key_ring_id"></a> [key\_ring\_id](#input\_key\_ring\_id) | n/a | `string` | n/a | yes |
-| <a name="input_labels"></a> [labels](#input\_labels) | n/a | `map(string)` | `{}` | no |
-| <a name="input_rotation_period"></a> [rotation\_period](#input\_rotation\_period) | n/a | `string` | n/a | yes |
+| <a name="input_key_ring_id"></a> [key\_ring\_id](#input\_key\_ring\_id) | ID of the KMS key ring used for secret encryption | `string` | n/a | yes |
+| <a name="input_next_rotation_time"></a> [next\_rotation\_time](#input\_next\_rotation\_time) | RFC3339 timestamp for the first rotation notification; required for Secret Manager to publish rotation events | `string` | n/a | yes |
+| <a name="input_rotation_period"></a> [rotation\_period](#input\_rotation\_period) | Rotation period for secrets, in RFC3339 duration format | `string` | n/a | yes |
 | <a name="input_secrets"></a> [secrets](#input\_secrets) | List of the secrets | `list(map(string))` | `[]` | no |
 | <a name="input_topics"></a> [topics](#input\_topics) | Topics that will be used for defined secrets | `list(string)` | `[]` | no |
 

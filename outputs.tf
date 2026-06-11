@@ -5,6 +5,7 @@ output "secret_names" {
   )
 
   description = "The name list of Secrets"
+  sensitive   = true
 }
 
 output "secret_versions" {
@@ -13,4 +14,5 @@ output "secret_versions" {
   )
 
   description = "The name list of Secret Versions"
+  sensitive   = true
 }

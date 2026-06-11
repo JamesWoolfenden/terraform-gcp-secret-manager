@@ -5,12 +5,11 @@ resource "google_secret_manager_secret" "secrets" {
   replication {
     auto {
       customer_managed_encryption {
-        kms_key_name = google_kms_crypto_key.secrets.name
+        kms_key_name = google_kms_crypto_key.secrets.id
       }
     }
   }
 
-  labels = var.labels
   dynamic "topics" {
     for_each = var.topics
     content {
@@ -19,7 +18,8 @@ resource "google_secret_manager_secret" "secrets" {
   }
 
   rotation {
-    rotation_period = var.rotation_period
+    rotation_period    = var.rotation_period
+    next_rotation_time = var.next_rotation_time
   }
 
   depends_on = [
