@@ -28,7 +28,7 @@ variable "rotation_period" {
   description = "Rotation period for secrets, in RFC3339 duration format"
 
   validation {
-    condition     = length(trim(var.rotation_period)) > 0
+    condition     = length(trimspace(var.rotation_period)) > 0
     error_message = "var.rotation_period must be a non-empty string"
   }
 }
@@ -48,7 +48,7 @@ variable "key_ring_id" {
   description = "ID of the KMS key ring used for secret encryption"
 
   validation {
-    condition     = length(trim(var.key_ring_id)) > 0
+    condition     = length(trimspace(var.key_ring_id)) > 0
     error_message = "var.key_ring_id must be a non-empty string"
   }
 }
