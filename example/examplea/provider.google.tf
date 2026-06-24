@@ -7,3 +7,11 @@ provider "google" {
     created_by = "terraform"
   }
 }
+
+provider "google-beta" {
+  default_labels = {
+    "owner"    = "holden"
+    module     = "terraform-gcp-secret-manager"
+    created_by = "terraform"
+  }
+}
