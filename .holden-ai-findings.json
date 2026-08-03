@@ -119,10 +119,9 @@
       "remediation": "Remove example/examplea/google_pubsub_topic_iam_member.tf \u2014 the module already creates this binding via its topics input.",
       "resource": "google_pubsub_topic_iam_member.publisher",
       "severity": "LOW",
-      "status": "open",
+      "status": "fixed",
       "suppression_reason": null,
-      "title": "Redundant duplicate google_pubsub_topic_iam_member.publisher binding in example \u2014 module already creates the same grant",
-      "unresolved_since": "2026-08-03"
+      "title": "Redundant duplicate google_pubsub_topic_iam_member.publisher binding in example \u2014 module already creates the same grant"
     }
   ],
   "scan_date": "2026-08-03T00:00:00Z",
