@@ -1,0 +1,137 @@
+{
+  "findings": [
+    {
+      "confidence": "high",
+      "explanation": "Fixed: module.secretmanager.tf now sets key_ring_id = google_kms_key_ring.secret.id, matching the key ring actually declared in google_kms_key_ring.tf.",
+      "file": "example/examplea/module.secretmanager.tf",
+      "first_seen": "2026-06-11",
+      "fixable": true,
+      "id": "HOLDEN_AI_001",
+      "last_seen": "2026-06-11",
+      "line": 4,
+      "principle": "repeatability",
+      "related_resources": [
+        "google_kms_key_ring.secret"
+      ],
+      "remediation": "Change the module call to: key_ring_id = google_kms_key_ring.secret.id",
+      "resource": "module.secret-manager",
+      "severity": "HIGH",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Example module call references non-existent key ring resource google_kms_key_ring.key_ring \u2014 terraform plan fails"
+    },
+    {
+      "confidence": "high",
+      "explanation": "Fixed: google_secret_manager_secret.tf:8 now sets kms_key_name = google_kms_crypto_key.secrets.id.",
+      "file": "google_secret_manager_secret.tf",
+      "first_seen": "2026-06-11",
+      "fixable": true,
+      "id": "HOLDEN_AI_002",
+      "last_seen": "2026-06-11",
+      "line": 8,
+      "principle": "encryption",
+      "related_resources": [
+        "google_kms_crypto_key.secrets"
+      ],
+      "remediation": "Change line 8 to: kms_key_name = google_kms_crypto_key.secrets.id",
+      "resource": "google_secret_manager_secret.secrets",
+      "severity": "HIGH",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Secret Manager CMEK uses .name instead of .id for kms_key_name \u2014 CMEK silently fails at apply"
+    },
+    {
+      "confidence": "high",
+      "explanation": "Fixed: google_kms_crypto_key.tf:3 now sets key_ring = google_kms_key_ring.secret.id, and google_pubsub_topic.tf:3 sets kms_key_name = google_kms_crypto_key.pubsub.id.",
+      "file": "example/examplea/google_kms_crypto_key.tf",
+      "first_seen": "2026-06-11",
+      "fixable": true,
+      "id": "HOLDEN_AI_003",
+      "last_seen": "2026-06-11",
+      "line": 3,
+      "principle": "encryption",
+      "related_resources": [
+        "google_kms_key_ring.secret",
+        "google_pubsub_topic.secret"
+      ],
+      "remediation": "key_ring = google_kms_key_ring.secret.id; kms_key_name = google_kms_crypto_key.pubsub.id",
+      "resource": "google_kms_crypto_key.pubsub",
+      "severity": "HIGH",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Example Pub/Sub KMS key used .name not .id for both key_ring and kms_key_name \u2014 CMEK on topic failed at apply"
+    },
+    {
+      "confidence": "high",
+      "explanation": "Fixed: google_secret_manager_secret.tf:22 now sets next_rotation_time = var.next_rotation_time, a new required variable added in variables.tf with RFC3339 validation, and wired through the example.",
+      "file": "google_secret_manager_secret.tf",
+      "first_seen": "2026-06-11",
+      "fixable": true,
+      "id": "HOLDEN_AI_004",
+      "last_seen": "2026-06-11",
+      "line": 20,
+      "principle": "governance",
+      "related_resources": [],
+      "remediation": "Add next_rotation_time to the rotation block and expose it as a module variable.",
+      "resource": "google_secret_manager_secret.secrets",
+      "severity": "MEDIUM",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "rotation block set rotation_period but omitted next_rotation_time \u2014 Secret Manager never published rotation notifications"
+    },
+    {
+      "confidence": "high",
+      "explanation": "google_pubsub_topic.secret (example/examplea/google_pubsub_topic.tf:3) sets kms_key_name to enable CMEK on google_kms_crypto_key.pubsub. Google requires the Pub/Sub service agent (service-{PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com) \u2014 not any other product's service identity \u2014 to hold roles/cloudkms.cryptoKeyEncrypterDecrypter on that key before the topic can actually use it. This file instead grants that role to google_project_service_identity.secretmanager, the Secret Manager P4SA, which has no legitimate need to touch the Pub/Sub topic's encryption key. No deterministic rule catches this: HLD_GCP_022 checks kms_key_name is set and HLD_GCP_107 checks the referenced key has rotation enabled, but neither verifies which principal actually received the decrypt grant. Blast radius: Google validates this grant when kms_key_name is set on a topic, so CMEK enrollment for the topic will fail at apply time (or the topic silently can't use the key), while the Secret Manager identity ends up with an unnecessary decrypt grant on a key it doesn't own.",
+      "file": "example/examplea/google_kms_crypto_key_iam_member.tf",
+      "first_seen": "2026-08-03",
+      "fix": "In example/examplea/google_project_service_identity.tf, add:\n\nresource \"google_project_service_identity\" \"pubsub\" {\n  provider = google-beta\n  service  = \"pubsub.googleapis.com\"\n}\n\nThen in example/examplea/google_kms_crypto_key_iam_member.tf line 4, change:\n\n  member = \"serviceAccount:${google_project_service_identity.pubsub.email}\"",
+      "fixable": true,
+      "id": "HOLDEN_AI_005",
+      "last_seen": "2026-08-03",
+      "line": 2,
+      "principle": "encryption",
+      "related_resources": [
+        "google_pubsub_topic.secret",
+        "google_kms_crypto_key.pubsub",
+        "google_project_service_identity.secretmanager"
+      ],
+      "remediation": "Add a google_project_service_identity for pubsub.googleapis.com (mirroring the existing pattern already used for secretmanager.googleapis.com in google_project_service_identity.tf), then point the IAM member at it instead of the Secret Manager identity.",
+      "resource": "google_kms_crypto_key_iam_member.pubsub_encrypter_decrypter",
+      "severity": "HIGH",
+      "status": "fixed",
+      "suppression_reason": null,
+      "title": "Pub/Sub topic's CMEK key IAM grant targets the Secret Manager service identity instead of the Pub/Sub service agent \u2014 CMEK enrollment is non-functional"
+    },
+    {
+      "confidence": "medium",
+      "explanation": "example/examplea/module.secretmanager.tf passes topics = [google_pubsub_topic.secret.id], which causes the module's own google_pubsub_topic_iam_member.publisher (for_each over var.topics) to grant roles/pubsub.publisher to the secretmanager P4SA on this same topic. example/examplea/google_pubsub_topic_iam_member.tf then declares a second, separate resource asserting the identical (role, member, topic) tuple. Terraform won't conflict since IAM member bindings are additive, but the second resource is dead weight \u2014 each resource is individually valid so no deterministic rule flags it; the redundancy is only visible once the module call and the example's root config are read together.",
+      "file": "example/examplea/google_pubsub_topic_iam_member.tf",
+      "first_seen": "2026-08-03",
+      "fixable": false,
+      "id": "HOLDEN_AI_006",
+      "last_seen": "2026-08-03",
+      "line": 2,
+      "principle": "maintainability",
+      "related_resources": [
+        "module.secret-manager",
+        "google_pubsub_topic.secret"
+      ],
+      "remediation": "Remove example/examplea/google_pubsub_topic_iam_member.tf \u2014 the module already creates this binding via its topics input.",
+      "resource": "google_pubsub_topic_iam_member.publisher",
+      "severity": "LOW",
+      "status": "open",
+      "suppression_reason": null,
+      "title": "Redundant duplicate google_pubsub_topic_iam_member.publisher binding in example \u2014 module already creates the same grant",
+      "unresolved_since": "2026-08-03"
+    }
+  ],
+  "scan_date": "2026-08-03T00:00:00Z",
+  "scan_path": ".",
+  "suggested_policies": [
+    {
+      "rationale": "HLD_GCP_022 confirms a google_pubsub_topic has kms_key_name set, and HLD_GCP_107 confirms the referenced key has rotation enabled, but neither checks that the IAM grant on that key actually targets the Pub/Sub service agent. As demonstrated by HOLDEN_AI_005 in this scan, a topic can pass both existing checks while its CMEK key's encrypter/decrypter role is granted to a completely unrelated principal, leaving CMEK non-functional. This mirrors the exact shape of the existing HLD_GCP_280 policy (Pub/Sub dead-letter policy requires service-agent publisher IAM on the DLQ topic) but for the topic's own CMEK key instead of its dead-letter topic.",
+      "yaml": "id: HLD_PROPOSED_006\nname: Pub/Sub topics using CMEK must grant key access to the Pub/Sub service agent\nprinciple: encryption\nseverity: HIGH\nrationale: |\n  When a google_pubsub_topic sets kms_key_name to enable CMEK, Google requires\n  the Pub/Sub service agent (service-{PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com)\n  to hold roles/cloudkms.cryptoKeyEncrypterDecrypter on that key. A\n  google_kms_crypto_key_iam_member granting this role to any other principal\n  (for example an unrelated product's service identity) leaves the topic's\n  CMEK enrollment non-functional even though a \"CMEK configured\" check on the\n  topic itself passes.\nremediation: |\n  Grant roles/cloudkms.cryptoKeyEncrypterDecrypter on the topic's KMS key to\n  the Pub/Sub service agent:\n  ```hcl\n  resource \"google_project_service_identity\" \"pubsub\" {\n    provider = google-beta\n    service  = \"pubsub.googleapis.com\"\n  }\n\n  resource \"google_kms_crypto_key_iam_member\" \"pubsub_encrypter_decrypter\" {\n    crypto_key_id = google_kms_crypto_key.pubsub.id\n    role          = \"roles/cloudkms.cryptoKeyEncrypterDecrypter\"\n    member        = \"serviceAccount:${google_project_service_identity.pubsub.email}\"\n  }\n  ```\nresources:\n  google_pubsub_topic:\n    filter:\n      path: kms_key_name\n      not_null: true\n    requires_companion:\n      type: google_kms_crypto_key_iam_member\n      linked_via:\n        from: kms_key_name\n        to: crypto_key_id\n      where:\n        path: member\n        matches: \"^serviceAccount:service-[0-9]+@gcp-sa-pubsub\\\\.iam\\\\.gserviceaccount\\\\.com$\"\n"
+    }
+  ],
+  "suggested_suppressions": []
+}

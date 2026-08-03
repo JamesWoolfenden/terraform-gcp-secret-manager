@@ -64,14 +64,20 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_key_ring_id"></a> [key\_ring\_id](#input\_key\_ring\_id) | ID of the KMS key ring used for secret encryption | `string` | n/a | yes |
+| <a name="input_kms_rotation_period"></a> [kms\_rotation\_period](#input\_kms\_rotation\_period) | Rotation period for the KMS crypto key protecting the secrets, in seconds duration format | `string` | `"7776000s"` | no |
 | <a name="input_next_rotation_time"></a> [next\_rotation\_time](#input\_next\_rotation\_time) | RFC3339 timestamp for the first rotation notification; required for Secret Manager to publish rotation events | `string` | n/a | yes |
 | <a name="input_rotation_period"></a> [rotation\_period](#input\_rotation\_period) | Rotation period for secrets, in RFC3339 duration format | `string` | n/a | yes |
-| <a name="input_secrets"></a> [secrets](#input\_secrets) | List of the secrets | `list(map(string))` | `[]` | no |
+| <a name="input_secrets"></a> [secrets](#input\_secrets) | List of the secrets | <pre>list(object({<br/>    name        = string<br/>    secret_data = string<br/>  }))</pre> | `[]` | no |
 | <a name="input_topics"></a> [topics](#input\_topics) | Topics that will be used for defined secrets | `list(string)` | `[]` | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+| ---- | ----------- |
+| <a name="output_kms_key_id"></a> [kms\_key\_id](#output\_kms\_key\_id) | ID of the KMS crypto key used to encrypt the secrets |
+| <a name="output_secret_ids"></a> [secret\_ids](#output\_secret\_ids) | Map of secret name to google\_secret\_manager\_secret resource ID |
+| <a name="output_secret_version_ids"></a> [secret\_version\_ids](#output\_secret\_version\_ids) | Map of secret name to google\_secret\_manager\_secret\_version resource ID |
+| <a name="output_service_account_email"></a> [service\_account\_email](#output\_service\_account\_email) | Email of the Secret Manager service identity used for CMEK and Pub/Sub publishing |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Role and Permissions
@@ -80,7 +86,7 @@ No outputs.
 The Terraform resource required is:
 
 ```golang
-
+# apply role
 resource "google_project_iam_custom_role" "terraform_pike" {
   project     = "pike-477416"
   role_id     = "terraform_pike"
@@ -104,6 +110,23 @@ resource "google_project_iam_custom_role" "terraform_pike" {
     "secretmanager.versions.add",
     "secretmanager.versions.destroy",
     "secretmanager.versions.enable",
+    "secretmanager.versions.get"
+  ]
+}
+
+# plan role
+resource "google_project_iam_custom_role" "terraform_pike_plan" {
+  project     = "pike-477416"
+  role_id     = "terraform_pike_plan"
+  title       = "terraform_pike_plan"
+  description = "A user with least privileges"
+  permissions = [
+    "cloudkms.cryptoKeyVersions.list",
+    "cloudkms.cryptoKeys.get",
+    "cloudkms.cryptoKeys.getIamPolicy",
+    "pubsub.topics.getIamPolicy",
+    "secretmanager.secrets.get",
+    "secretmanager.versions.access",
     "secretmanager.versions.get"
   ]
 }

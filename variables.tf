@@ -1,13 +1,16 @@
 
 variable "secrets" {
-  type        = list(map(string))
+  type = list(object({
+    name        = string
+    secret_data = string
+  }))
   description = "List of the secrets"
   default     = []
   sensitive   = true
 
   validation {
-    condition     = alltrue([for s in var.secrets : length(keys(s)) > 0])
-    error_message = "each element of var.secrets must be a non-empty map of string attributes"
+    condition     = alltrue([for s in var.secrets : length(trimspace(s.name)) > 0])
+    error_message = "each element of var.secrets must have a non-empty name"
   }
 }
 
@@ -46,9 +49,21 @@ variable "next_rotation_time" {
 variable "key_ring_id" {
   type        = string
   description = "ID of the KMS key ring used for secret encryption"
+  sensitive   = true
 
   validation {
     condition     = length(trimspace(var.key_ring_id)) > 0
     error_message = "var.key_ring_id must be a non-empty string"
+  }
+}
+
+variable "kms_rotation_period" {
+  type        = string
+  description = "Rotation period for the KMS crypto key protecting the secrets, in seconds duration format"
+  default     = "7776000s"
+
+  validation {
+    condition     = length(trimspace(var.kms_rotation_period)) > 0
+    error_message = "var.kms_rotation_period must be a non-empty string"
   }
 }
